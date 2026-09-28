@@ -1,0 +1,103 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenKiln · Profiles</title><link rel="stylesheet" href="/app.css">
+<style>
+.pgrid{grid-template-columns:360px 1fr}
+.list{display:grid;gap:9px}
+.item{padding:13px;border:1px solid var(--line);border-radius:9px;cursor:pointer}
+.item:hover{border-color:#9db8f7}
+.item.sel{border-color:var(--b);background:#eff6ff;box-shadow:0 0 0 1px var(--b)}
+.item.sel b{color:var(--b)}
+.badge{color:var(--ok);font-weight:700}
+.item b{display:block}
+.toprow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.toprow input{flex:1;min-width:180px}
+.steps{margin-top:16px}
+.step{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin:8px 0;align-items:center}
+.step input{width:100%}
+@media(max-width:800px){.pgrid{grid-template-columns:1fr}.step{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<header><a class="brand" href="/"><svg viewBox="0 0 32 40" aria-hidden="true"><path fill="#ff7a00" d="M18 1c2 9-5 10-2 18 1-5 5-7 6-12 7 7 10 15 8 22-2 7-8 11-15 11C7 40 1 34 2 26 3 19 9 16 9 9c5 4 6 8 5 12 4-5 1-12 4-20z"/><path fill="#ffd43b" d="M17 18c1 5-3 6-1 10 1-3 3-4 4-7 4 4 5 8 4 12-1 4-4 6-8 6-5 0-8-3-8-7 0-4 4-6 4-10 3 2 3 5 3 7 2-3 1-7 2-11z"/></svg>OpenKiln</a>
+<nav class="nav"><a href="/">Dashboard</a><a href="/profiles">Profiles</a><a href="/setup">Setup</a></nav>
+<div id="wifi" class="wifi off"><svg viewBox="0 0 24 24"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10.5 10.5 0 0 1 14 0M8.5 15.5a5.3 5.3 0 0 1 7 0M12 19h.01"/></svg><div id="wifiTip" class="tip">Wi‑Fi disconnected</div></div></header>
+<main><h1>Profiles</h1><div class="grid pgrid">
+<section class="card"><h2>Profiles</h2><div id="profileList" class="list"></div><p><button class="btn" onclick="newProfile()">New profile</button></p><p class="muted">Choose which profile to fire on the Dashboard.</p></section>
+<section class="card"><h2>Profile editor</h2>
+<div class="toprow"><input id="profileName" placeholder="Profile name" maxlength="32">
+<button class="btn primary" onclick="saveProfile()">Save</button><button class="btn danger" onclick="deleteProfile()">Delete</button></div>
+<div class="steps"><div class="step muted"><span>Time (min)</span><span>Temperature °C</span><span>Slope °C/h</span><span></span></div><div id="steps"></div>
+<button class="btn" onclick="addStep()">+ Add step</button> <span class="muted">Max 24 points</span></div>
+<div id="msg" class="msg"></div></section>
+<section class="card wide"><h2>Profile curve</h2><canvas id="profileChart"></canvas></section>
+</div></main>
+<script src="/app.js"></script>
+<script>
+let currentSlot = -1, points = [];
+function say(t) { $('msg').textContent = t; }
+async function loadList() {
+  const a = await req('/api/profiles');
+  const list = $('profileList');
+  list.innerHTML = '';
+  a.forEach(x => {
+    const d = document.createElement('div');
+    d.className = 'item' + (x.slot === currentSlot ? ' sel' : '');
+    d.dataset.slot = x.slot;
+    d.innerHTML = '<b>' + esc(x.name) + '</b>' + (x.active ? '<span class="badge">● Active on dashboard</span>' : '<span class="muted">Slot ' + x.slot + '</span>');
+    d.onclick = () => { markSelected(x.slot); loadProfile(x.slot); };
+    list.appendChild(d);
+  });
+  return a;
+}
+function markSelected(slot) {
+  document.querySelectorAll('.item').forEach(el => el.classList.toggle('sel', +el.dataset.slot === slot));
+}
+async function loadProfile(slot) {
+  try {
+    const d = await req('/api/profiles?slot=' + slot);
+    currentSlot = d.slot; $('profileName').value = d.name;
+    points = (d.data || []).map(p => [+p[0], +p[1]]);
+    render(); markSelected(currentSlot);
+  } catch (e) { say(e.message); }
+}
+function newProfile() { currentSlot = -1; $('profileName').value = ''; points = [[0, 20], [60, 600]]; render(); markSelected(-1); }
+function slope(i) { if (i <= 0) return ''; const dt = points[i][0] - points[i - 1][0]; return dt > 0 ? ((points[i][1] - points[i - 1][1]) * 60 / dt).toFixed(1) : ''; }
+function render() {
+  $('steps').innerHTML = points.map((p, i) =>
+    `<div class="step"><input type="number" step="0.1" min="0" value="${p[0]}" ${i === 0 ? 'disabled' : ''} onchange="setPoint(${i},0,this.value)">` +
+    `<input type="number" step="0.1" value="${p[1]}" onchange="setPoint(${i},1,this.value)">` +
+    `<input type="number" step="0.1" value="${slope(i)}" ${i === 0 ? 'disabled' : ''} onchange="setSlope(${i},this.value)">` +
+    `<button class="btn danger" onclick="removeStep(${i})" ${points.length <= 2 ? 'disabled' : ''}>×</button></div>`).join('');
+  drawProfile($('profileChart'), points);
+}
+function setPoint(i, j, v) { points[i][j] = Number(v); render(); }
+function setSlope(i, v) {
+  const sl = Number(v);
+  if (i > 0 && sl) points[i][0] = +(points[i - 1][0] + (points[i][1] - points[i - 1][1]) * 60 / sl).toFixed(1);
+  render();
+}
+function addStep() {
+  if (points.length >= 24) return say('Maximum 24 points');
+  const p = points.length ? points[points.length - 1] : [0, 20];
+  points.push([p[0] + 60, p[1]]); render();
+}
+function removeStep(i) { if (points.length > 2) { points.splice(i, 1); render(); } }
+function validate() {
+  if (points[0][0] !== 0) return 'The first point must be at minute 0';
+  for (let i = 1; i < points.length; i++) if (!(points[i][0] > points[i - 1][0])) return 'Times must increase (row ' + (i + 1) + ')';
+  return '';
+}
+async function saveProfile() {
+  try {
+    const name = $('profileName').value.trim();
+    if (!name) throw Error('Profile name is required');
+    const bad = validate(); if (bad) throw Error(bad);
+    const r = await post('/api/profiles', {action: 'save', slot: currentSlot, name, data: JSON.stringify(points)});
+    currentSlot = r.slot; say('Profile saved'); await loadList();
+  } catch (e) { say(e.message); }
+}
+async function deleteProfile() {
+  if (currentSlot < 0 || !confirm('Delete this profile?')) return;
+  try { await post('/api/profiles', {action: 'delete', slot: currentSlot}); await loadList(); newProfile(); say('Profile deleted'); } catch (e) { say(e.message); }
+}
+window.addEventListener('resize', () => drawProfile($('profileChart'), points));
+loadList().then(a => { const active = a.find(x => x.active) || a[0]; active ? loadProfile(active.slot) : newProfile(); }).catch(e => { say(e.message); newProfile(); });
+</script></body></html>

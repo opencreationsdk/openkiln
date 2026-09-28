@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenKiln · Dashboard</title><link rel="stylesheet" href="/app.css"></head><body>
+<header><a class="brand" href="/"><svg viewBox="0 0 32 40" aria-hidden="true"><path fill="#ff7a00" d="M18 1c2 9-5 10-2 18 1-5 5-7 6-12 7 7 10 15 8 22-2 7-8 11-15 11C7 40 1 34 2 26 3 19 9 16 9 9c5 4 6 8 5 12 4-5 1-12 4-20z"/><path fill="#ffd43b" d="M17 18c1 5-3 6-1 10 1-3 3-4 4-7 4 4 5 8 4 12-1 4-4 6-8 6-5 0-8-3-8-7 0-4 4-6 4-10 3 2 3 5 3 7 2-3 1-7 2-11z"/></svg>OpenKiln</a>
+<nav class="nav"><a href="/">Dashboard</a><a href="/profiles">Profiles</a><a href="/setup">Setup</a></nav>
+<div id="wifi" class="wifi off"><svg viewBox="0 0 24 24"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10.5 10.5 0 0 1 14 0M8.5 15.5a5.3 5.3 0 0 1 7 0M12 19h.01"/></svg><div id="wifiTip" class="tip">Wi‑Fi disconnected</div></div></header>
+<main><h1>Dashboard</h1>
+<div id="noCheck" class="card fault" style="margin-bottom:20px;border-color:#dc2626" hidden>⚠ Thermocouple fault checking is disabled (SENSOR_CHECK_ENABLED in Config.h). Do not fire unattended.</div>
+<div class="grid">
+<section class="card"><h2>Temperature</h2><div class="metric"><span id="temp">—</span> °C</div><div class="muted">Target: <span id="target">—</span> °C</div></section>
+<section class="card"><h2>Firing</h2><div class="metric" id="state">—</div><div class="muted">Profile: <span id="profile">—</span></div><div id="fault" class="fault"></div></section>
+<section class="card wide"><h2>Profile curve</h2><canvas id="profileGraph"></canvas></section>
+<section class="card"><h2>Runtime</h2>
+<div class="kv"><span>Elapsed</span><b id="elapsed">—</b></div>
+<div class="kv"><span>Heating rate</span><b id="rate">—</b></div>
+<div class="kv"><span>Output</span><b id="duty">—</b></div></section>
+<section class="card"><h2>Control</h2>
+<div class="row" style="margin-bottom:14px"><select id="profileSelect" style="flex:1;min-width:160px" aria-label="Profile"></select>
+<button class="btn" id="bUse" onclick="useProfile()">Use profile</button></div>
+<div class="row">
+<button class="btn primary" id="bStart" onclick="control('start')">Start</button>
+<button class="btn" id="bPause" onclick="control('pause')">Pause</button>
+<button class="btn primary" id="bResume" onclick="control('resume')">Resume</button>
+<button class="btn danger" id="bStop" onclick="control('stop')">Stop</button>
+<button class="btn" id="bClear" onclick="control('clear')">Clear fault</button>
+</div><div id="msg" class="msg"></div></section>
+</div></main>
+<script src="/app.js"></script>
+<script>
+let graph = [], st = {}, graphKey = '';
+function show(id, on) { $(id).hidden = !on; }
+function redraw() {
+  const live = st.state === 'RUNNING' || st.state === 'PAUSED';
+  drawProfile($('profileGraph'), graph, live ? {minute: st.elapsed, temp: st.temp} : null);
+}
+async function loadGraph(slot) {
+  try { const d = await req('/api/profiles?slot=' + slot); graph = (d.data || []).map(p => [+p[0], +p[1]]); } catch (e) { graph = []; }
+  redraw();
+}
+async function loadProfileList() {
+  try {
+    const a = await req('/api/profiles'), sel = $('profileSelect');
+    sel.innerHTML = a.map(x => '<option value="' + x.slot + '">' + esc(x.name) + '</option>').join('');
+    sel.value = st.slot;
+  } catch (e) {}
+}
+async function useProfile() {
+  const slot = $('profileSelect').value;
+  try { await post('/api/profiles', {action: 'select', slot}); $('msg').textContent = 'Profile selected'; await status(); }
+  catch (e) { $('msg').textContent = e.message; }
+}
+async function status() {
+  try {
+    st = await req('/api/status');
+    $('temp').textContent = fmt(st.temp, 1);
+    $('target').textContent = fmt(st.target, 1);
+    $('state').textContent = st.state || '—';
+    $('profile').textContent = st.profile || '—';
+    $('fault').textContent = st.fault || (st.sensor_ok === false ? 'Thermocouple not responding' : '');
+    $('elapsed').textContent = st.elapsed == null ? '—' : fmt(st.elapsed, 1) + ' / ' + fmt(st.total, 0) + ' min';
+    $('rate').textContent = fmt(st.rate, 0, ' °C/h');
+    $('duty').textContent = fmt(st.duty, 0, ' %');
+    const s = st.state;
+    show('bStart', s === 'IDLE' || s === 'COMPLETE');
+    show('bPause', s === 'RUNNING');
+    show('bResume', s === 'PAUSED');
+    show('bClear', s === 'FAULT');
+    show('noCheck', st.sensor_check === false);
+    const firing = s === 'RUNNING' || s === 'PAUSED';
+    $('profileSelect').disabled = $('bUse').disabled = firing;
+    const key = st.slot + ':' + st.profile_rev;
+    if (key !== graphKey) { graphKey = key; loadGraph(st.slot); loadProfileList(); } else redraw();
+  } catch (e) { $('msg').textContent = e.message; }
+}
+async function control(cmd) {
+  if (cmd === 'stop' && (st.state === 'RUNNING' || st.state === 'PAUSED') && !confirm('Stop the firing?')) return;
+  $('msg').textContent = 'Sending ' + cmd + '…';
+  try { await post('/api/control', {cmd}); $('msg').textContent = cmd.charAt(0).toUpperCase() + cmd.slice(1) + ' OK'; await status(); }
+  catch (e) { $('msg').textContent = e.message; }
+}
+window.addEventListener('resize', redraw);
+status();
+setInterval(status, 3000);
+</script></body></html>

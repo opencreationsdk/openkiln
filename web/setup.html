@@ -1,0 +1,210 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenKiln · Setup</title><link rel="stylesheet" href="/app.css">
+<style>
+main{max-width:1420px}
+.sgrid{grid-template-columns:1.15fr .85fr;align-items:start}
+.title{display:flex;align-items:center;gap:11px;font-size:26px;font-weight:800;border-bottom:1px solid var(--line);padding-bottom:18px;margin:0 0 20px}
+.sub{font-size:20px;border:0;padding:0;margin:0 0 12px}
+.ico{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.frow{display:grid;grid-template-columns:190px 1fr;align-items:center;gap:18px;margin:14px 0}
+.frow input,.frow select{width:100%}
+.frow.top{align-items:start}
+.frow.top>label{padding-top:12px}
+.hint{color:var(--muted);font-size:14px;margin-top:7px}
+.sep{height:1px;background:var(--line);margin:24px 0}
+.adv{border:1px solid var(--line);border-radius:12px;margin-top:14px;overflow:hidden}
+.adv>summary{display:flex;align-items:center;gap:14px;padding:18px;cursor:pointer;font-size:18px;font-weight:750;list-style:none}
+.adv>summary::-webkit-details-marker{display:none}
+.chev{margin-left:auto;transition:.2s}
+.adv[open]>summary .chev{transform:rotate(90deg)}
+.advbody{border-top:1px solid var(--line);padding:16px 18px;background:#fbfdff}
+.advbody label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}
+.advbody input:not([type=checkbox]),.advbody select{width:100%}
+.advbody label.chk{display:flex;gap:9px;align-items:center;font-size:15px;color:var(--ink)}
+.actions{position:sticky;bottom:0;background:var(--bg);padding:16px 0;margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+@media(max-width:900px){.sgrid{grid-template-columns:1fr}.frow{grid-template-columns:1fr;gap:5px}}
+</style></head><body>
+<header><a class="brand" href="/"><svg viewBox="0 0 32 40" aria-hidden="true"><path fill="#ff7a00" d="M18 1c2 9-5 10-2 18 1-5 5-7 6-12 7 7 10 15 8 22-2 7-8 11-15 11C7 40 1 34 2 26 3 19 9 16 9 9c5 4 6 8 5 12 4-5 1-12 4-20z"/><path fill="#ffd43b" d="M17 18c1 5-3 6-1 10 1-3 3-4 4-7 4 4 5 8 4 12-1 4-4 6-8 6-5 0-8-3-8-7 0-4 4-6 4-10 3 2 3 5 3 7 2-3 1-7 2-11z"/></svg>OpenKiln</a>
+<nav class="nav"><a href="/">Dashboard</a><a href="/profiles">Profiles</a><a href="/setup">Setup</a></nav>
+<div id="wifi" class="wifi off"><svg viewBox="0 0 24 24"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10.5 10.5 0 0 1 14 0M8.5 15.5a5.3 5.3 0 0 1 7 0M12 19h.01"/></svg><div id="wifiTip" class="tip">Wi‑Fi disconnected</div></div></header>
+<main><h1>Setup</h1>
+<form id="f" autocomplete="off"><div class="grid sgrid">
+<section class="card">
+<div class="title"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>General</div>
+<div class="frow"><label for="wifi_ssid">Wi‑Fi SSID</label><input id="wifi_ssid" name="wifi_ssid" maxlength="32"></div>
+<div class="frow"><label for="wifi_password">Wi‑Fi password</label><input id="wifi_password" name="wifi_password" type="password" autocomplete="new-password" placeholder="Leave blank to keep current"></div>
+<div class="frow"><label for="hostname">Hostname</label><div><input id="hostname" name="hostname" maxlength="32" placeholder="kiln"><div class="hint">Local address: http://<b id="hn">kiln</b>.local</div></div></div>
+<div class="frow"><label for="language">Language</label><select id="language" name="language"><option value="en">English</option><option value="da">Dansk</option></select></div>
+<div class="frow"><label for="auth_required">Access</label><select id="auth_required" name="auth_required"><option value="1">Login required</option><option value="0">No login</option></select></div>
+<div class="frow"><label for="web_user">Web username</label><input id="web_user" name="web_user" maxlength="32"></div>
+<div class="frow"><label for="web_password">Web password</label><input id="web_password" name="web_password" type="password" autocomplete="new-password" placeholder="Leave blank to keep current"></div>
+<div class="sep"></div>
+<div class="title sub"><svg class="ico" viewBox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M5 14v5h14v-5"/></svg>Firmware</div>
+<div class="frow top"><label>Installed version</label><div><div class="row"><strong id="fwVersion">—</strong>
+<button type="button" id="checkUpdate" class="btn">↻ Check for update</button>
+<button type="button" id="installUpdate" class="btn primary" hidden>Install update</button></div>
+<div id="updateStatus" class="hint"></div><div id="progressWrap" class="bar" hidden><div id="progressBar"></div></div></div></div>
+<div class="sep"></div>
+<div class="title sub"><svg class="ico" viewBox="0 0 24 24"><path d="M12 20v-8M8.5 20h7M5.6 16.4a9 9 0 0 1 0-8.8M18.4 7.6a9 9 0 0 1 0 8.8M8.5 13.5a4 4 0 0 1 0-3M15.5 10.5a4 4 0 0 1 0 3"/><circle cx="12" cy="8" r="1"/></svg>Access Point</div>
+<div class="frow top"><label style="padding-top:0">Status</label><div><span id="apDot" class="dot"></span> <strong id="apStatus">—</strong><div id="apInfo" class="hint"></div></div></div>
+<div class="frow"><label for="ap_name">AP name</label><input id="ap_name" name="ap_name" maxlength="32"></div>
+<div class="frow"><label for="ap_password">AP password</label><input id="ap_password" name="ap_password" type="password" autocomplete="new-password" minlength="8" placeholder="8+ characters; blank keeps current"></div>
+<div class="frow"><span></span><div><button type="button" id="apButton" class="btn">Enable Access Point</button></div></div>
+</section>
+
+<section class="card">
+<div class="title"><svg class="ico" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>Advanced</div>
+<details class="adv"><summary><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Time<span class="chev">›</span></summary><div class="advbody">
+<label for="timezone">Timezone</label><select id="timezone" name="timezone">
+<option value="CET-1CEST,M3.5.0,M10.5.0/3">Denmark / Central Europe</option>
+<option value="GMT0BST,M3.5.0/1,M10.5.0">United Kingdom</option>
+<option value="EET-2EEST,M3.5.0/3,M10.5.0/4">Finland / Eastern Europe</option>
+<option value="UTC0">UTC</option>
+<option value="EST5EDT,M3.2.0/2,M11.1.0/2">US Eastern</option>
+<option value="CST6CDT,M3.2.0/2,M11.1.0/2">US Central</option>
+<option value="MST7MDT,M3.2.0/2,M11.1.0/2">US Mountain</option>
+<option value="PST8PDT,M3.2.0/2,M11.1.0/2">US Pacific</option></select>
+<label for="ntp_server">NTP server</label><input id="ntp_server" name="ntp_server" placeholder="pool.ntp.org">
+<div class="hint">Daylight saving time is handled automatically. Time is only needed for logging and power-failure recovery.</div></div></details>
+
+<details class="adv"><summary><svg class="ico" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="m8 11 8-4M8 13l8 4"/></svg>MQTT<span class="chev">›</span></summary><div class="advbody">
+<label class="chk"><input type="checkbox" name="mqtt_enabled"> Enabled</label>
+<label>Broker / host</label><input name="mqtt_host"><label>Port</label><input name="mqtt_port" type="number" min="1" max="65535" placeholder="1883">
+<label>Username</label><input name="mqtt_user"><label>Password</label><input name="mqtt_password" type="password" autocomplete="new-password" placeholder="Leave blank to keep current">
+<label>Topic prefix</label><input name="mqtt_topic" placeholder="kiln/controller">
+<label class="chk"><input type="checkbox" name="mqtt_control"> Allow remote pause/resume</label>
+<label class="chk"><input type="checkbox" name="mqtt_start"> Allow remote START</label>
+<div class="hint">STOP is always accepted remotely because it can only remove heat.</div></div></details>
+
+<details class="adv"><summary><svg class="ico" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></svg>InfluxDB 2.x<span class="chev">›</span></summary><div class="advbody">
+<label class="chk"><input type="checkbox" name="influx_enabled"> Enabled</label>
+<label>URL</label><input name="influx_url" placeholder="http://192.168.1.10:8086"><label>Organisation</label><input name="influx_org">
+<label>Bucket</label><input name="influx_bucket"><label>Token</label><input name="influx_token" type="password" autocomplete="new-password" placeholder="Leave blank to keep current">
+<label>Write interval (seconds)</label><input name="influx_interval" type="number" min="5" max="86400"></div></details>
+
+<details class="adv"><summary><svg class="ico" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>Pushover<span class="chev">›</span></summary><div class="advbody">
+<label class="chk"><input type="checkbox" name="pushover_enabled"> Enabled</label>
+<label>User / group key</label><input name="pushover_user" type="password" autocomplete="new-password" placeholder="Leave blank to keep current">
+<label>Application token</label><input name="pushover_token" type="password" autocomplete="new-password" placeholder="Leave blank to keep current">
+<div class="hint">Notifications: firing started, complete, stopped and fault.</div></div></details>
+
+<details class="adv"><summary><svg class="ico" viewBox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M5 14v5h14v-5"/></svg>Manual firmware upload<span class="chev">›</span></summary><div class="advbody">
+<input type="file" id="firmwareFile" accept=".bin"><div style="height:10px"></div>
+<button type="button" id="manualUpload" class="btn">Upload firmware</button>
+<div id="upWrap" class="bar" hidden><div id="upBar"></div></div><div id="manualStatus" class="hint">Heating is forced off during the update. Blocked while firing.</div></div></details>
+
+<details class="adv"><summary><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>System<span class="chev">›</span></summary><div class="advbody">
+<p class="hint">RAM, flash, uptime, CPU and network information.</p><a class="btn" href="/system">Open system information</a></div></details>
+</section></div>
+
+<div class="actions"><button class="btn primary" type="submit">Save settings</button><button class="btn" type="button" id="reboot">Reboot OpenKiln</button><span id="msg" class="muted"></span></div>
+</form></main>
+<script src="/app.js"></script>
+<script>
+const f = $('f');
+let rebooting = false;
+function say(t) { $('msg').textContent = t; }
+
+async function load() {
+  try {
+    const s = await req('/api/settings');
+    for (const [k, v] of Object.entries(s)) {
+      const e = f.elements[k];
+      if (!e) continue;
+      if (e.type === 'checkbox') e.checked = !!v;
+      else {
+        if (e.tagName === 'SELECT' && ![...e.options].some(o => o.value === String(v))) e.add(new Option(String(v), String(v)));
+        e.value = v == null ? '' : v;
+      }
+    }
+    $('hn').textContent = s.hostname || 'kiln';
+  } catch (e) { say('Unable to load settings: ' + e.message); }
+  try { $('fwVersion').textContent = (await req('/api/update/status')).installed; } catch (e) {}
+  pollUpdate(true);
+}
+f.elements.hostname.oninput = e => $('hn').textContent = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') || 'kiln';
+f.onsubmit = async e => {
+  e.preventDefault();
+  say('Saving…');
+  try { await req('/api/settings', {method: 'POST', body: new URLSearchParams(new FormData(f))}); say('Saved. Changes apply after reboot.'); }
+  catch (x) { say('Save failed: ' + x.message); }
+};
+$('reboot').onclick = async () => {
+  if (!confirm('Reboot OpenKiln?')) return;
+  try { await post('/api/reboot'); rebooting = true; say('Rebooting…'); setTimeout(waitReboot, 4000); } catch (e) { say(e.message); }
+};
+
+// Access point
+document.addEventListener('wifi', e => {
+  const d = e.detail;
+  $('apDot').classList.toggle('on', d.ap_enabled);
+  $('apStatus').textContent = d.ap_enabled ? 'Enabled' : 'Disabled';
+  $('apInfo').textContent = d.ap_enabled ? d.ap_ssid + ' · ' + d.ap_ip + ' · ' + d.ap_clients + ' client(s)' : 'Re-enabled automatically on reboot.';
+  $('apButton').textContent = d.ap_enabled ? 'Disable Access Point' : 'Enable Access Point';
+  $('apButton').dataset.on = d.ap_enabled ? '1' : '';
+});
+$('apButton').onclick = async () => {
+  const on = !!$('apButton').dataset.on;
+  try { await post(on ? '/api/ap/disable' : '/api/ap/enable'); setTimeout(() => location.reload(), 800); }
+  catch (e) { $('apInfo').textContent = e.message; }
+};
+
+// Firmware update (runs in the background on the controller; we poll its status)
+function renderUpdate(u) {
+  const t = $('updateStatus');
+  $('progressWrap').hidden = !(u.running || u.stage === 'rebooting');
+  $('progressBar').style.width = (u.progress || 0) + '%';
+  if (u.running || u.stage === 'rebooting') t.textContent = (u.message || u.stage) + (u.stage === 'downloading' ? ' ' + u.progress + '%' : '');
+  else if (u.checking) t.textContent = 'Checking for update…';
+  else if (u.stage === 'error') t.textContent = 'Update failed: ' + u.message;
+  else if (u.check_error) t.textContent = 'Update check: ' + u.check_error;
+  else if (u.checked) t.textContent = u.available ? 'New firmware ' + u.latest + ' is available.' : 'Firmware is up to date (latest ' + u.latest + ').';
+  $('installUpdate').hidden = !(u.available && !u.running && !u.checking);
+  $('checkUpdate').disabled = u.checking || u.running;
+}
+async function pollUpdate(once) {
+  let u;
+  try { u = await req('/api/update/status'); }
+  catch (e) { if (rebooting) setTimeout(waitReboot, 1500); return; }
+  renderUpdate(u);
+  if (u.stage === 'rebooting') { rebooting = true; setTimeout(waitReboot, 3000); return; }
+  if (u.running) rebooting = u.stage === 'installing';
+  if (u.checking || u.running || (!once && !u.checked)) setTimeout(() => pollUpdate(false), 700);
+}
+async function waitReboot() {
+  $('updateStatus').textContent = 'Waiting for OpenKiln to come back…';
+  try {
+    const u = await req('/api/update/status');
+    rebooting = false;
+    $('fwVersion').textContent = u.installed;
+    $('progressWrap').hidden = true;
+    $('updateStatus').textContent = 'OpenKiln is back. Running firmware ' + u.installed + '.';
+    say('');
+  } catch (e) { setTimeout(waitReboot, 2000); }
+}
+$('checkUpdate').onclick = async () => {
+  try { await post('/api/update/check'); pollUpdate(false); } catch (e) { $('updateStatus').textContent = e.message; }
+};
+$('installUpdate').onclick = async () => {
+  if (!confirm('Install the new firmware now? OpenKiln will reboot.')) return;
+  try { await post('/api/update/install'); pollUpdate(false); } catch (e) { $('updateStatus').textContent = 'Update failed: ' + e.message; }
+};
+$('manualUpload').onclick = () => {
+  const file = $('firmwareFile').files[0], m = $('manualStatus');
+  if (!file) return m.textContent = 'Select firmware.bin first.';
+  const fd = new FormData();
+  fd.append('firmware', file, file.name);
+  const x = new XMLHttpRequest();
+  x.open('POST', '/update');
+  x.upload.onprogress = e => { if (e.lengthComputable) $('upBar').style.width = (e.loaded * 100 / e.total) + '%'; };
+  x.onload = () => {
+    if (x.status === 200) { m.textContent = 'Firmware uploaded. OpenKiln is rebooting…'; rebooting = true; setTimeout(waitReboot, 4000); }
+    else m.textContent = 'Upload failed: ' + (x.responseText || x.status);
+  };
+  x.onerror = () => m.textContent = 'Connection lost during upload.';
+  $('upWrap').hidden = false;
+  m.textContent = 'Uploading…';
+  x.send(fd);
+};
+load();
+</script></body></html>

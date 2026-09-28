@@ -1,0 +1,34 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenKiln · System</title><link rel="stylesheet" href="/app.css"><style>.big{font-size:34px;font-weight:800}</style></head><body>
+<header><a class="brand" href="/"><svg viewBox="0 0 32 40" aria-hidden="true"><path fill="#ff7a00" d="M18 1c2 9-5 10-2 18 1-5 5-7 6-12 7 7 10 15 8 22-2 7-8 11-15 11C7 40 1 34 2 26 3 19 9 16 9 9c5 4 6 8 5 12 4-5 1-12 4-20z"/><path fill="#ffd43b" d="M17 18c1 5-3 6-1 10 1-3 3-4 4-7 4 4 5 8 4 12-1 4-4 6-8 6-5 0-8-3-8-7 0-4 4-6 4-10 3 2 3 5 3 7 2-3 1-7 2-11z"/></svg>OpenKiln</a>
+<nav class="nav"><a href="/">Dashboard</a><a href="/profiles">Profiles</a><a href="/setup">Setup</a></nav>
+<div id="wifi" class="wifi off"><svg viewBox="0 0 24 24"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10.5 10.5 0 0 1 14 0M8.5 15.5a5.3 5.3 0 0 1 7 0M12 19h.01"/></svg><div id="wifiTip" class="tip">Wi‑Fi disconnected</div></div></header>
+<main><div class="row" style="justify-content:space-between"><h1>System</h1><button class="btn primary" onclick="load()">Refresh</button></div><div class="grid">
+<section class="card"><h2>RAM / Heap</h2><div class="big"><span id="heapPct">—</span>% used</div><div class="bar"><div id="heapBar"></div></div>
+<div class="kv"><span>Total</span><b id="heapTotal">—</b></div><div class="kv"><span>Used</span><b id="heapUsed">—</b></div><div class="kv"><span>Free</span><b id="heapFree">—</b></div>
+<div class="kv"><span>Minimum free since boot</span><b id="heapMin">—</b></div><div class="kv"><span>Largest free block</span><b id="heapMax">—</b></div></section>
+<section class="card"><h2>Flash</h2><div class="big"><span id="flashPct">—</span>% of OTA slot used</div><div class="bar"><div id="flashBar"></div></div>
+<div class="kv"><span>Flash size</span><b id="flashTotal">—</b></div><div class="kv"><span>Firmware</span><b id="sketchUsed">—</b></div><div class="kv"><span>Free OTA space</span><b id="sketchFree">—</b></div></section>
+<section class="card wide"><h2>OpenKiln</h2><div class="kv"><span>Firmware</span><b id="version">—</b></div><div class="kv"><span>Uptime</span><b id="uptime">—</b></div>
+<div class="kv"><span>CPU frequency</span><b id="cpu">—</b></div><div class="kv"><span>Wi‑Fi SSID</span><b id="ssid">—</b></div>
+<div class="kv"><span>IP address</span><b id="ip">—</b></div><div class="kv"><span>Wi‑Fi signal</span><b id="rssi">—</b></div></section>
+</div><p class="muted">Values are updated when you press Refresh.</p></main>
+<script src="/app.js"></script>
+<script>
+const kb = n => (n / 1024).toFixed(1) + ' KB', mb = n => (n / 1048576).toFixed(2) + ' MB';
+function uptime(s) { const d = Math.floor(s / 86400); s %= 86400; const h = Math.floor(s / 3600); s %= 3600; return (d ? d + 'd ' : '') + h + 'h ' + Math.floor(s / 60) + 'm ' + (s % 60) + 's'; }
+async function load() {
+  try {
+    const d = await req('/api/system'), used = d.heapTotal - d.heapFree, p = d.heapTotal ? Math.round(used * 100 / d.heapTotal) : 0;
+    $('heapPct').textContent = p; $('heapBar').style.width = p + '%';
+    $('heapTotal').textContent = kb(d.heapTotal); $('heapUsed').textContent = kb(used); $('heapFree').textContent = kb(d.heapFree);
+    $('heapMin').textContent = kb(d.heapMinFree); $('heapMax').textContent = kb(d.heapLargest);
+    const slot = d.sketchSize + d.freeSketch, fp = slot ? Math.round(d.sketchSize * 100 / slot) : 0;
+    $('flashPct').textContent = fp; $('flashBar').style.width = fp + '%';
+    $('flashTotal').textContent = mb(d.flashSize); $('sketchUsed').textContent = mb(d.sketchSize); $('sketchFree').textContent = mb(d.freeSketch);
+    $('version').textContent = d.version; $('uptime').textContent = uptime(d.uptime); $('cpu').textContent = d.cpuMHz + ' MHz';
+    $('ssid').textContent = d.ssid || 'Not connected'; $('ip').textContent = d.ip || '—'; $('rssi').textContent = d.connected ? d.rssi + ' dBm' : '—';
+  } catch (e) {}
+}
+load();
+</script></body></html>
