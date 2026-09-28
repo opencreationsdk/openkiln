@@ -1,87 +1,78 @@
 <!doctype html>
-<html lang="en">
-<head>
+<html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>OpenKiln · Setup</title>
 <style>
 :root{--blue:#1769ff;--ink:#111827;--muted:#64748b;--line:#dbe3ec;--bg:#f6f9fc;--card:#fff}
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
-header{height:76px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 32px;gap:42px;position:sticky;top:0;z-index:5}
-.brand{display:flex;align-items:center;gap:10px;font-size:28px;font-weight:800}.flame{font-size:34px}.nav{display:flex;gap:28px;flex:1}.nav a{color:#334155;text-decoration:none;padding:26px 4px 22px}.nav .active{color:var(--blue);font-weight:700;border-bottom:3px solid var(--blue)}
-.wifi{position:relative;font-size:28px;cursor:default}.wifi.off{opacity:.35}.tip{display:none;position:absolute;right:-8px;top:40px;background:#17202d;color:#fff;padding:12px 14px;border-radius:9px;min-width:210px;font-size:14px;line-height:1.6;box-shadow:0 8px 25px #0003}.wifi:hover .tip{display:block}
-main{max-width:1420px;margin:34px auto;padding:0 28px}h1{font-size:40px;margin:0 0 28px}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:22px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 3px 12px #0f172a0a}.card h2{margin:0 0 20px;font-size:26px;border-bottom:1px solid var(--line);padding-bottom:18px}
-.row{display:grid;grid-template-columns:190px 1fr;align-items:center;gap:18px;margin:14px 0}.row input,.row select{width:100%;padding:13px 15px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px;background:#fff}
-.sep{height:1px;background:var(--line);margin:24px 0}.btn{border:1px solid var(--blue);background:#fff;color:var(--blue);font-weight:700;border-radius:9px;padding:12px 18px;cursor:pointer}.btn.primary{background:var(--blue);color:#fff}.btn:disabled{opacity:.5;cursor:not-allowed}.status{color:var(--muted);font-size:14px;margin-top:8px}
-details.advanced summary{font-size:26px;font-weight:800;cursor:pointer;list-style:none}details.advanced summary::-webkit-details-marker{display:none}.advitem{border:1px solid var(--line);border-radius:12px;margin-top:14px;padding:17px 18px}.advitem summary{font-size:18px;font-weight:750}.advbody{padding-top:12px}.progress{height:12px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:12px 0}.progress>div{height:100%;width:0;background:var(--blue);transition:width .25s}
-.apline{display:flex;align-items:center;gap:10px}.dot{width:12px;height:12px;border-radius:50%;background:#94a3b8}.dot.on{background:#22c55e}
-@media(max-width:900px){header{padding:0 16px}.nav{display:none}.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr;gap:6px}main{padding:0 14px}}
-</style>
-</head>
-<body>
+header{height:76px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 30px;gap:44px;position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:11px;font-size:27px;font-weight:800;white-space:nowrap}.brand svg{width:31px;height:39px}
+.nav{display:flex;align-items:stretch;gap:32px;height:100%;flex:1}.nav a{display:flex;align-items:center;color:#334155;text-decoration:none;padding:0 3px;border-bottom:3px solid transparent}.nav a.active{color:var(--blue);font-weight:700;border-color:var(--blue)}
+.wifi{position:relative;width:34px;height:34px;display:grid;place-items:center;cursor:default}.wifi svg{width:29px;height:29px;stroke:#16a34a}.wifi.off svg{stroke:#94a3b8}.tip{display:none;position:absolute;right:-8px;top:38px;background:#17202d;color:white;padding:12px 15px;border-radius:9px;min-width:220px;font-size:14px;line-height:1.6;box-shadow:0 8px 25px #0003}.wifi:hover .tip{display:block}
+main{max-width:1420px;margin:0 auto;padding:0 28px 44px}h1{font-size:38px;margin:0 0 28px}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:22px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 3px 12px #0f172a0a}.title{display:flex;align-items:center;gap:11px;font-size:26px;font-weight:800;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:20px}.ico{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.row{display:grid;grid-template-columns:190px 1fr;align-items:center;gap:18px;margin:14px 0}.row input,.row select,.field{width:100%;padding:13px 15px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px;background:#fff}.sep{height:1px;background:var(--line);margin:24px 0}
+.btn{border:1px solid var(--blue);background:#fff;color:var(--blue);font-weight:700;border-radius:9px;padding:12px 18px;cursor:pointer}.btn.primary{background:var(--blue);color:#fff}.btn:disabled{opacity:.5}.status{color:var(--muted);font-size:14px;margin-top:7px}.apline{display:flex;gap:9px;align-items:center}.dot{width:12px;height:12px;border-radius:50%;background:#94a3b8}.dot.on{background:#22c55e}
+details.advanced>summary{display:flex;align-items:center;gap:11px;font-size:26px;font-weight:800;cursor:pointer;list-style:none;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:8px}details summary::-webkit-details-marker{display:none}
+.chev{margin-left:auto;transition:.2s}.advanced[open]>.advhead .chev{transform:rotate(180deg)}
+.advitem{border:1px solid var(--line);border-radius:12px;margin-top:14px;overflow:hidden}.advitem>summary{display:flex;align-items:center;gap:14px;padding:18px;cursor:pointer;font-size:18px;font-weight:750;list-style:none}.advitem>summary .chev{margin-left:auto}.advitem[open]>summary .chev{transform:rotate(90deg)}.advbody{border-top:1px solid var(--line);padding:16px 18px;background:#fbfdff}.advbody label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}.advbody input,.advbody select{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:8px;background:white}
+.progress{height:12px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:10px 0}.progress>div{height:100%;width:0;background:var(--blue);transition:width .2s}
+@media(max-width:900px){header{padding:0 14px;gap:14px}.nav{display:none}main{padding:0 14px 30px}.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr;gap:5px}}
+</style></head><body>
 <header>
- <div class="brand"><span class="flame">🔥</span>OpenKiln</div>
- <nav class="nav"><a href="/">Dashboard</a><a href="/profiles">Program</a><a href="/">Status</a><a class="active" href="/setup">Setup</a></nav>
- <div id="wifi" class="wifi off">⌁<div id="wifiTip" class="tip">Wi‑Fi disconnected</div></div>
+<div class="brand">
+<svg viewBox="0 0 32 40" aria-hidden="true"><path fill="#ff7a00" d="M18 1c2 9-5 10-2 18 1-5 5-7 6-12 7 7 10 15 8 22-2 7-8 11-15 11C7 40 1 34 2 26 3 19 9 16 9 9c5 4 6 8 5 12 4-5 1-12 4-20z"/><path fill="#ffd43b" d="M17 18c1 5-3 6-1 10 1-3 3-4 4-7 4 4 5 8 4 12-1 4-4 6-8 6-5 0-8-3-8-7 0-4 4-6 4-10 3 2 3 5 3 7 2-3 1-7 2-11z"/></svg>
+OpenKiln</div>
+<nav class="nav"><a href="/">Dashboard</a><a href="/profiles">Program</a><a href="/">Status</a><a href="/setup" class="active">Setup</a></nav>
+<div id="wifi" class="wifi off">
+<svg viewBox="0 0 24 24"><path d="M2 8.5a15 15 0 0 1 20 0M5 12a10.5 10.5 0 0 1 14 0M8.5 15.5a5.3 5.3 0 0 1 7 0M12 19h.01"/></svg>
+<div id="wifiTip" class="tip">Wi‑Fi disconnected</div></div>
 </header>
-<main>
-<h1>Setup</h1>
-<div class="grid">
+<main><h1>Setup</h1><div class="grid">
 <section class="card">
-<h2>⚙ General</h2>
+<div class="title"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.13.37.34.7.6 1 .3.27.7.4 1.1.4h.1v4h-.1a1.7 1.7 0 0 0-1.7.6z"/></svg>General</div>
 <div class="row"><label>Wi‑Fi SSID</label><input id="ssid"></div>
 <div class="row"><label>Wi‑Fi Password</label><input id="wifiPassword" type="password"></div>
 <div class="row"><label>Hostname</label><input id="hostname" value="kiln"></div>
 <div class="row"><label>Language</label><select id="language"><option value="en">English</option><option value="da">Dansk</option></select></div>
 <div class="row"><label>Access</label><select id="access"><option value="none">No login</option><option value="login">Login required</option></select></div>
 <div class="sep"></div>
-<div class="row"><label>Firmware version</label><div><strong id="fwVersion">—</strong> &nbsp; <button class="btn" id="checkUpdate">↻ Check for update</button><div id="updateStatus" class="status"></div><div class="progress" id="progressWrap" hidden><div id="progressBar"></div></div></div></div>
+<div class="row"><label>Firmware version</label><div><strong id="fwVersion">1.0.0</strong> &nbsp;<button id="checkUpdate" class="btn">↻ Check for update</button><div id="updateStatus" class="status"></div><div id="progressWrap" class="progress" hidden><div id="progressBar"></div></div></div></div>
 <div class="sep"></div>
-<h3>⌁ Access Point</h3>
-<div class="row"><label>Status</label><div><div class="apline"><span id="apDot" class="dot"></span><strong id="apStatus">Disabled</strong></div><div class="status" id="apInfo">AP is disabled while connected to local Wi‑Fi.</div></div></div>
-<div class="row"><span></span><button id="apButton" class="btn primary">⌁ Enable Access Point</button></div>
+<div class="title" style="font-size:20px;border:0;padding:0;margin:0 0 12px"><svg class="ico" viewBox="0 0 24 24"><path d="M12 20v-8M8.5 20h7M5.6 16.4a9 9 0 0 1 0-8.8M18.4 7.6a9 9 0 0 1 0 8.8M8.5 13.5a4 4 0 0 1 0-3M15.5 10.5a4 4 0 0 1 0 3"/><circle cx="12" cy="8" r="1"/></svg>Access Point</div>
+<div class="row"><label>Status</label><div><div class="apline"><span id="apDot" class="dot"></span><strong id="apStatus">Disabled</strong></div><div id="apInfo" class="status">AP is disabled while connected to local Wi‑Fi.</div></div></div>
+<div class="row"><span></span><button id="apButton" class="btn primary">Enable Access Point</button></div>
 </section>
+
 <section class="card">
-<details class="advanced">
-<summary>♧ Advanced ▴</summary>
-<div class="advitem"><details><summary>◷ Timezone</summary><div class="advbody"><select id="timezone"><option value="Europe/Copenhagen">Denmark (Europe/Copenhagen)</option><option value="Europe/London">United Kingdom</option><option value="Europe/Berlin">Central Europe</option><option value="UTC">UTC</option></select></div></details></div>
-<div class="advitem"><details><summary>⌁ MQTT</summary><div class="advbody" id="mqttArea">MQTT settings are available here.</div></details></div>
-<div class="advitem"><details><summary>▱ InfluxDB</summary><div class="advbody" id="influxArea">InfluxDB settings are available here.</div></details></div>
-<div class="advitem"><details><summary>♧ Pushover</summary><div class="advbody" id="pushoverArea">Pushover settings are available here.</div></details></div>
-<div class="advitem"><details><summary>⇧ Firmware Update</summary><div class="advbody"><p>Manual firmware upload remains available in Advanced.</p><input type="file" id="firmwareFile" accept=".bin"><button class="btn" id="manualUpload">Upload firmware</button></div></details></div>
-</details>
-</section>
-</div>
-</main>
+<details class="advanced" open><summary class="advhead">
+<svg class="ico" viewBox="0 0 24 24"><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zM18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/></svg>
+Advanced <span class="chev">⌃</span></summary>
+
+<details class="advitem"><summary><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Timezone<span class="chev">›</span></summary><div class="advbody">
+<select id="timezone"><option value="Europe/Copenhagen">Denmark (Europe/Copenhagen)</option><option value="Europe/London">United Kingdom</option><option value="Europe/Berlin">Central Europe</option><option value="UTC">UTC</option></select>
+<div class="status">Denmark automatically handles CET/CEST daylight saving time.</div></div></details>
+
+<details class="advitem"><summary><svg class="ico" viewBox="0 0 24 24"><circle cx="6" cy="12" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="m8 11 8-4M8 13l8 4"/></svg>MQTT<span class="chev">›</span></summary><div class="advbody">
+<label>Broker / Host</label><input id="mqttHost"><label>Port</label><input id="mqttPort" type="number" value="1883"><label>Username</label><input id="mqttUser"><label>Password</label><input id="mqttPassword" type="password"></div></details>
+
+<details class="advitem"><summary><svg class="ico" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></svg>InfluxDB<span class="chev">›</span></summary><div class="advbody">
+<label>URL / Host</label><input id="influxHost"><label>Database / Bucket</label><input id="influxDb"><label>Token / Password</label><input id="influxToken" type="password"></div></details>
+
+<details class="advitem"><summary><svg class="ico" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>Pushover<span class="chev">›</span></summary><div class="advbody">
+<label>User key</label><input id="pushoverUser"><label>Application token</label><input id="pushoverToken" type="password"></div></details>
+
+<details class="advitem"><summary><svg class="ico" viewBox="0 0 24 24"><path d="M12 16V4M8 8l4-4 4 4M5 14v5h14v-5"/></svg>Firmware Update<span class="chev">›</span></summary><div class="advbody">
+<input type="file" id="firmwareFile" accept=".bin"><div style="height:10px"></div><button id="manualUpload" class="btn">Upload firmware</button><div id="manualStatus" class="status"></div></div></details>
+</details></section></div></main>
+
 <script>
 const $=id=>document.getElementById(id);
-async function wifiStatus(){
- try{
-  const r=await fetch('/api/wifi-status',{cache:'no-store'}); const d=await r.json();
-  $('wifi').classList.toggle('off',!d.connected);
-  $('wifi').textContent=d.connected?'⌁':'⌁';
-  const t=document.createElement('div');t.id='wifiTip';t.className='tip';
-  t.innerHTML=d.connected?`<b>Wi‑Fi connected</b><br>SSID: ${d.ssid||'—'}<br>IP: ${d.ip||'—'}<br>Signal: ${d.rssi||0} dBm`:'Wi‑Fi disconnected';
-  $('wifi').appendChild(t);
- }catch(e){}
-}
-async function toggleAP(){
- const enabled=$('apDot').classList.contains('on');
- const r=await fetch(enabled?'/api/ap/disable':'/api/ap/enable',{method:'POST'});
- if(r.ok){setAP(!enabled,!enabled?'Enabled manually':'Disabled');}
-}
-function setAP(on,text){$('apDot').classList.toggle('on',on);$('apStatus').textContent=text;$('apButton').textContent=on?'Disable Access Point':'⌁ Enable Access Point';}
+async function getJSON(url,opt){const r=await fetch(url,Object.assign({cache:'no-store'},opt||{}));if(!r.ok)throw new Error(r.status);return r.json()}
+async function wifiStatus(){try{const d=await getJSON('/api/wifi-status');$('wifi').classList.toggle('off',!d.connected);$('wifiTip').innerHTML=d.connected?`<b>Wi‑Fi connected</b><br>SSID: ${d.ssid||'—'}<br>IP: ${d.ip||'—'}<br>Signal: ${d.rssi||0} dBm`:'Wi‑Fi disconnected';}catch(e){}}
+async function toggleAP(){const on=$('apDot').classList.contains('on');try{await getJSON(on?'/api/ap/disable':'/api/ap/enable',{method:'POST'});setAP(!on,!on?'Enabled manually':'Disabled')}catch(e){$('apInfo').textContent='Unable to change Access Point state.'}}
+function setAP(on,label){$('apDot').classList.toggle('on',on);$('apStatus').textContent=label;$('apButton').textContent=on?'Disable Access Point':'Enable Access Point'}
 $('apButton').onclick=toggleAP;
-$('checkUpdate').onclick=async()=>{
- $('checkUpdate').disabled=true;$('updateStatus').textContent='Checking for update…';
- try{
-  const r=await fetch('/api/update/check',{method:'POST'}); const d=await r.json();
-  $('updateStatus').textContent=d.message||d.status||'Update check complete.';
- }catch(e){$('updateStatus').textContent='Update check failed.'}
- $('checkUpdate').disabled=false;
-};
-async function loadInfo(){
- try{const r=await fetch('/api/update/status',{cache:'no-store'});const d=await r.json();if(d.currentVersion)$('fwVersion').textContent=d.currentVersion;}catch(e){}
-}
-wifiStatus();loadInfo();setInterval(wifiStatus,10000);
-</script>
-</body></html>
+$('checkUpdate').onclick=async()=>{const b=$('checkUpdate');b.disabled=true;$('updateStatus').textContent='Checking for update…';try{const d=await getJSON('/api/update/check',{method:'POST'});$('updateStatus').textContent=d.message||d.status||'Update check complete.'}catch(e){$('updateStatus').textContent='Update check failed.'}b.disabled=false};
+$('manualUpload').onclick=async()=>{const f=$('firmwareFile').files[0];if(!f)return $('manualStatus').textContent='Select firmware.bin first.';$('manualStatus').textContent='Uploading firmware…';const fd=new FormData();fd.append('firmware',f);try{const r=await fetch('/update',{method:'POST',body:fd});$('manualStatus').textContent=r.ok?'Firmware uploaded. OpenKiln is rebooting…':'Firmware upload failed.'}catch(e){$('manualStatus').textContent='Connection closed while OpenKiln rebooted.'}};
+wifiStatus();setInterval(wifiStatus,10000);
+</script></body></html>
