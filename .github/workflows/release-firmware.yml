@@ -1,0 +1,98 @@
+name: Build and release OpenKiln firmware
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "include/**"
+      - "lib/**"
+      - "platformio.ini"
+      - ".github/workflows/release-firmware.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: openkiln-release
+  cancel-in-progress: false
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read firmware version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(sed -n 's/.*FIRMWARE_VERSION[[:space:]]*=[[:space:]]*"\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)".*/\1/p' src/main.cpp | head -n1)
+          if [ -z "$VERSION" ]; then
+            echo "Could not find FIRMWARE_VERSION in src/main.cpp"
+            exit 1
+          fi
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid firmware version: $VERSION (expected X.Y.Z)"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "OpenKiln firmware version: $VERSION"
+
+      - name: Check whether release tag already exists
+        id: tagcheck
+        shell: bash
+        run: |
+          git fetch --tags --force
+          if git rev-parse "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Tag ${{ steps.version.outputs.tag }} already exists; build will be verified but no duplicate release will be created."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+
+      - name: Build firmware
+        run: pio run -e esp32dev
+
+      - name: Verify firmware binary
+        shell: bash
+        run: |
+          test -s .pio/build/esp32dev/firmware.bin
+          cp .pio/build/esp32dev/firmware.bin firmware.bin
+          echo "Built firmware.bin: $(stat -c%s firmware.bin) bytes"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openkiln-${{ steps.version.outputs.version }}
+          path: firmware.bin
+          if-no-files-found: error
+
+      - name: Create GitHub release and upload firmware.bin
+        if: steps.tagcheck.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          gh release create "$TAG" firmware.bin \
+            --target "$GITHUB_SHA" \
+            --title "OpenKiln $TAG" \
+            --generate-notes \
+            --latest
+          echo "Created release $TAG with firmware.bin"
