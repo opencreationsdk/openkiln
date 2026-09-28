@@ -1,6 +1,6 @@
-# ESP32 Kiln Controller
+# OpenKiln
 
-Standalone ESP32 kiln controller with local web UI and persistent settings.
+Standalone OpenKiln controller with local web UI and persistent settings.
 
 ## Pages
 - `/` Oven dashboard: status, temperature, target, SSR duty, controls, saved-profile selector and selected profile graph.
@@ -27,3 +27,7 @@ The controller always starts its fallback AP. Defaults are still in `include/Con
 
 ## Build
 Open in VS Code + PlatformIO, build environment `esp32dev`, then upload over USB for the initial installation. Subsequent firmware can be uploaded from Setup.
+
+
+## Firmware version
+Change only `OPENKILN_VERSION` in `include/Version.h` before publishing a new firmware release.
