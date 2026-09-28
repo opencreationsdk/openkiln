@@ -18,7 +18,7 @@ namespace {
 constexpr size_t MAX_PROFILE_POINTS = 24;
 constexpr size_t MAX_SAVED_PROFILES = 8;
 constexpr time_t VALID_EPOCH = 1700000000;
-constexpr const char* FIRMWARE_VERSION = "1.0.0";
+constexpr const char* FIRMWARE_VERSION = "1.0.4";
 constexpr const char* GITHUB_RELEASE_API = "https://api.github.com/repos/opencreationsdk/openkiln/releases/latest";
 constexpr uint32_t UPDATE_CHECK_INTERVAL_MS = 24UL * 60UL * 60UL * 1000UL;
 
