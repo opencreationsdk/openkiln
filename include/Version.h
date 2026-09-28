@@ -1,3 +1,3 @@
 #pragma once
 
-#define OPENKILN_VERSION "1.0.6"
+#define OPENKILN_VERSION "1.0.7"
