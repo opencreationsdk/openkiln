@@ -875,6 +875,112 @@ void tryAutomaticRestart() {
 
 }  // namespace
 
+
+String openKilnWifiStatusJson() {
+  String j = "{";
+  j += "\"connected\":";
+  j += (WiFi.status() == WL_CONNECTED ? "true" : "false");
+  j += ",\"ssid\":\"";
+  if (WiFi.status() == WL_CONNECTED) j += WiFi.SSID();
+  j += "\",\"ip\":\"";
+  if (WiFi.status() == WL_CONNECTED) j += WiFi.localIP().toString();
+  j += "\",\"rssi\":";
+  j += String(WiFi.status() == WL_CONNECTED ? WiFi.RSSI() : 0);
+  j += "}";
+  return j;
+}
+
+
+const char OPENKILN_MODERN_SETUP_PAGE[] PROGMEM = R"OPENKILNHTML(
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenKiln · Setup</title>
+<style>
+:root{--blue:#1769ff;--ink:#111827;--muted:#64748b;--line:#dbe3ec;--bg:#f6f9fc;--card:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+header{height:76px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 32px;gap:42px;position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:10px;font-size:28px;font-weight:800}.flame{font-size:34px}.nav{display:flex;gap:28px;flex:1}.nav a{color:#334155;text-decoration:none;padding:26px 4px 22px}.nav .active{color:var(--blue);font-weight:700;border-bottom:3px solid var(--blue)}
+.wifi{position:relative;font-size:28px;cursor:default}.wifi.off{opacity:.35}.tip{display:none;position:absolute;right:-8px;top:40px;background:#17202d;color:#fff;padding:12px 14px;border-radius:9px;min-width:210px;font-size:14px;line-height:1.6;box-shadow:0 8px 25px #0003}.wifi:hover .tip{display:block}
+main{max-width:1420px;margin:34px auto;padding:0 28px}h1{font-size:40px;margin:0 0 28px}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:22px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 3px 12px #0f172a0a}.card h2{margin:0 0 20px;font-size:26px;border-bottom:1px solid var(--line);padding-bottom:18px}
+.row{display:grid;grid-template-columns:190px 1fr;align-items:center;gap:18px;margin:14px 0}.row input,.row select{width:100%;padding:13px 15px;border:1px solid #cbd5e1;border-radius:9px;font-size:16px;background:#fff}
+.sep{height:1px;background:var(--line);margin:24px 0}.btn{border:1px solid var(--blue);background:#fff;color:var(--blue);font-weight:700;border-radius:9px;padding:12px 18px;cursor:pointer}.btn.primary{background:var(--blue);color:#fff}.btn:disabled{opacity:.5;cursor:not-allowed}.status{color:var(--muted);font-size:14px;margin-top:8px}
+details.advanced summary{font-size:26px;font-weight:800;cursor:pointer;list-style:none}details.advanced summary::-webkit-details-marker{display:none}.advitem{border:1px solid var(--line);border-radius:12px;margin-top:14px;padding:17px 18px}.advitem summary{font-size:18px;font-weight:750}.advbody{padding-top:12px}.progress{height:12px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:12px 0}.progress>div{height:100%;width:0;background:var(--blue);transition:width .25s}
+.apline{display:flex;align-items:center;gap:10px}.dot{width:12px;height:12px;border-radius:50%;background:#94a3b8}.dot.on{background:#22c55e}
+@media(max-width:900px){header{padding:0 16px}.nav{display:none}.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr;gap:6px}main{padding:0 14px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><span class="flame">🔥</span>OpenKiln</div>
+ <nav class="nav"><a href="/">Dashboard</a><a href="/profiles">Program</a><a href="/">Status</a><a class="active" href="/setup">Setup</a></nav>
+ <div id="wifi" class="wifi off">⌁<div id="wifiTip" class="tip">Wi‑Fi disconnected</div></div>
+</header>
+<main>
+<h1>Setup</h1>
+<div class="grid">
+<section class="card">
+<h2>⚙ General</h2>
+<div class="row"><label>Wi‑Fi SSID</label><input id="ssid"></div>
+<div class="row"><label>Wi‑Fi Password</label><input id="wifiPassword" type="password"></div>
+<div class="row"><label>Hostname</label><input id="hostname" value="kiln"></div>
+<div class="row"><label>Language</label><select id="language"><option value="en">English</option><option value="da">Dansk</option></select></div>
+<div class="row"><label>Access</label><select id="access"><option value="none">No login</option><option value="login">Login required</option></select></div>
+<div class="sep"></div>
+<div class="row"><label>Firmware version</label><div><strong id="fwVersion">—</strong> &nbsp; <button class="btn" id="checkUpdate">↻ Check for update</button><div id="updateStatus" class="status"></div><div class="progress" id="progressWrap" hidden><div id="progressBar"></div></div></div></div>
+<div class="sep"></div>
+<h3>⌁ Access Point</h3>
+<div class="row"><label>Status</label><div><div class="apline"><span id="apDot" class="dot"></span><strong id="apStatus">Disabled</strong></div><div class="status" id="apInfo">AP is disabled while connected to local Wi‑Fi.</div></div></div>
+<div class="row"><span></span><button id="apButton" class="btn primary">⌁ Enable Access Point</button></div>
+</section>
+<section class="card">
+<details class="advanced">
+<summary>♧ Advanced ▴</summary>
+<div class="advitem"><details><summary>◷ Timezone</summary><div class="advbody"><select id="timezone"><option value="Europe/Copenhagen">Denmark (Europe/Copenhagen)</option><option value="Europe/London">United Kingdom</option><option value="Europe/Berlin">Central Europe</option><option value="UTC">UTC</option></select></div></details></div>
+<div class="advitem"><details><summary>⌁ MQTT</summary><div class="advbody" id="mqttArea">MQTT settings are available here.</div></details></div>
+<div class="advitem"><details><summary>▱ InfluxDB</summary><div class="advbody" id="influxArea">InfluxDB settings are available here.</div></details></div>
+<div class="advitem"><details><summary>♧ Pushover</summary><div class="advbody" id="pushoverArea">Pushover settings are available here.</div></details></div>
+<div class="advitem"><details><summary>⇧ Firmware Update</summary><div class="advbody"><p>Manual firmware upload remains available in Advanced.</p><input type="file" id="firmwareFile" accept=".bin"><button class="btn" id="manualUpload">Upload firmware</button></div></details></div>
+</details>
+</section>
+</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+async function wifiStatus(){
+ try{
+  const r=await fetch('/api/wifi-status',{cache:'no-store'}); const d=await r.json();
+  $('wifi').classList.toggle('off',!d.connected);
+  $('wifi').textContent=d.connected?'⌁':'⌁';
+  const t=document.createElement('div');t.id='wifiTip';t.className='tip';
+  t.innerHTML=d.connected?`<b>Wi‑Fi connected</b><br>SSID: ${d.ssid||'—'}<br>IP: ${d.ip||'—'}<br>Signal: ${d.rssi||0} dBm`:'Wi‑Fi disconnected';
+  $('wifi').appendChild(t);
+ }catch(e){}
+}
+async function toggleAP(){
+ const enabled=$('apDot').classList.contains('on');
+ const r=await fetch(enabled?'/api/ap/disable':'/api/ap/enable',{method:'POST'});
+ if(r.ok){setAP(!enabled,!enabled?'Enabled manually':'Disabled');}
+}
+function setAP(on,text){$('apDot').classList.toggle('on',on);$('apStatus').textContent=text;$('apButton').textContent=on?'Disable Access Point':'⌁ Enable Access Point';}
+$('apButton').onclick=toggleAP;
+$('checkUpdate').onclick=async()=>{
+ $('checkUpdate').disabled=true;$('updateStatus').textContent='Checking for update…';
+ try{
+  const r=await fetch('/api/update/check',{method:'POST'}); const d=await r.json();
+  $('updateStatus').textContent=d.message||d.status||'Update check complete.';
+ }catch(e){$('updateStatus').textContent='Update check failed.'}
+ $('checkUpdate').disabled=false;
+};
+async function loadInfo(){
+ try{const r=await fetch('/api/update/status',{cache:'no-store'});const d=await r.json();if(d.currentVersion)$('fwVersion').textContent=d.currentVersion;}catch(e){}
+}
+wifiStatus();loadInfo();setInterval(wifiStatus,10000);
+</script>
+</body></html>
+)OPENKILNHTML";
+
 void setup() {
   Serial.begin(115200);
   pinMode(PIN_SSR, OUTPUT);
@@ -888,6 +994,30 @@ void setup() {
   mqttClient.setCallback(onMqttMessage);
   mqttClient.setBufferSize(512);
   installWebRoutes();
+  
+  server.on("/api/wifi-status", HTTP_GET, []() {
+    server.send(200, "application/json", openKilnWifiStatusJson());
+  });
+
+  
+  server.on("/api/ap/enable", HTTP_POST, []() {
+    WiFi.mode(WIFI_AP_STA);
+    bool ok = WiFi.softAP("OpenKiln-Setup");
+    server.send(ok ? 200 : 500, "application/json",
+                ok ? "{\"ok\":true,\"enabled\":true}" : "{\"ok\":false}");
+  });
+
+  server.on("/api/ap/disable", HTTP_POST, []() {
+    WiFi.softAPdisconnect(true);
+    if (WiFi.status() == WL_CONNECTED) WiFi.mode(WIFI_STA);
+    server.send(200, "application/json", "{\"ok\":true,\"enabled\":false}");
+  });
+
+  
+  server.on("/setup", HTTP_GET, []() {
+    server.send_P(200, "text/html", OPENKILN_MODERN_SETUP_PAGE);
+  });
+
   server.begin();
   tryAutomaticRestart();
   ssrWindowStartMs = millis();
