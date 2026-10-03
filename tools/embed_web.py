@@ -19,7 +19,7 @@ except NameError:
 
 WEB_DIR = os.path.join(PROJECT_DIR, "web")
 OUT_FILE = os.path.join(PROJECT_DIR, "include", "WebAssets.h")
-MIME = {".html": "text/html", ".css": "text/css", ".js": "application/javascript", ".svg": "image/svg+xml"}
+MIME = {".html": "text/html", ".css": "text/css", ".js": "application/javascript", ".svg": "image/svg+xml", ".png": "image/png"}
 
 
 def minify(text):
@@ -46,7 +46,11 @@ def build():
         ext = os.path.splitext(name)[1]
         if ext not in MIME:
             continue
-        raw = minify(open(os.path.join(WEB_DIR, name), encoding="utf-8").read()).encode("utf-8")
+        path = os.path.join(WEB_DIR, name)
+        if ext in {".html", ".css", ".js", ".svg"}:
+            raw = minify(open(path, encoding="utf-8").read()).encode("utf-8")
+        else:
+            raw = open(path, "rb").read()
         gz = gzip.compress(raw, compresslevel=9, mtime=0)
         ident = "WEB_" + re.sub(r"[^A-Za-z0-9]", "_", name).upper()
         etag = '"' + hashlib.sha1(gz).hexdigest()[:12] + '"'

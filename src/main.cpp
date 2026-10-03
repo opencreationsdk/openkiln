@@ -1660,6 +1660,7 @@ void installWebRoutes() {
   server.on("/system", HTTP_GET, [] { sendAsset(WEB_SYSTEM_HTML); });
   server.on("/app.css", HTTP_GET, [] { sendAsset(WEB_APP_CSS); });
   server.on("/app.js", HTTP_GET, [] { sendAsset(WEB_APP_JS); });
+  server.on("/favicon.png", HTTP_GET, [] { sendAsset(WEB_FAVICON_PNG); });
 
   server.on("/api/status", HTTP_GET, handleStatus);
   server.on("/api/profiles", HTTP_GET, handleProfilesGet);
