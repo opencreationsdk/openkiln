@@ -9,7 +9,7 @@ constexpr char WIFI_PASSWORD[] = "";
 constexpr char AP_NAME[] = "KilnController";
 constexpr char AP_PASSWORD[] = "change-this-ap-password";  // 8+ characters
 constexpr char WEB_USER[] = "admin";
-constexpr char WEB_PASSWORD[] = "change-me";
+constexpr char WEB_PASSWORD[] = "admin";
 
 // ---------- MQTT ----------
 // Leave MQTT_HOST empty to disable MQTT. MQTT requires station-mode Wi-Fi.
